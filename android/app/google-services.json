@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "318956009088",
+    "project_id": "book-shop-e3bc4",
+    "storage_bucket": "book-shop-e3bc4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:318956009088:android:c233986c3c485adef35865",
+        "android_client_info": {
+          "package_name": "com.codeforany.book_grocer"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAX2fCoAFB30eTSZKyWlJyuzM4PZKhXtyY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
