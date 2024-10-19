@@ -1,0 +1,144 @@
+import 'package:flutter/material.dart';
+
+// Mock service to simulate fetching data
+class WishlistService {
+  Future<List<Product>> getWishlistItems() async {
+    // Simulate network delay
+    await Future.delayed(Duration(seconds: 1));
+    return [
+      Product(id: '1', name: 'The Dissappearance', price: 299.99, imageUrl: 'assets/img/1.jpg'),
+      Product(id: '2', name: 'Fatherhood', price: 899.99, imageUrl: 'assets/img/2.jpg'),
+      Product(id: '3', name: 'The Time Travellers', price: 99.99, imageUrl: 'assets/img/3.jpg'),
+      // Add more products as needed
+    ];
+  }
+}
+
+class Product {
+  final String id;
+  final String name;
+  final double price;
+  final String imageUrl;
+
+  Product({required this.id, required this.name, required this.price, required this.imageUrl});
+}
+
+class WishlistScreen extends StatefulWidget {
+    const WishlistScreen({Key? key}) : super(key: key);
+
+  @override
+  _WishlistScreenState createState() => _WishlistScreenState();
+}
+
+class _WishlistScreenState extends State<WishlistScreen> {
+  final WishlistService _wishlistService = WishlistService();
+  List<Product> _wishlistItems = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadWishlistItems();
+  }
+
+  Future<void> _loadWishlistItems() async {
+    setState(() {
+      _isLoading = true;
+    });
+    final items = await _wishlistService.getWishlistItems();
+    setState(() {
+      _wishlistItems = items;
+      _isLoading = false;
+    });
+  }
+
+  void _removeFromWishlist(Product product) {
+    setState(() {
+      _wishlistItems.removeWhere((item) => item.id == product.id);
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('${product.name} removed from wishlist')),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('My Wishlist'),
+       backgroundColor: Color(0xff5ABD8C),
+      ),
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : _wishlistItems.isEmpty
+              ? Center(child: Text('Your wishlist is empty'))
+              : GridView.builder(
+                  padding: EdgeInsets.all(16),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 0.7,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                  ),
+                  itemCount: _wishlistItems.length,
+                  itemBuilder: (context, index) {
+                    final product = _wishlistItems[index];
+                    return WishlistItem(
+                      product: product,
+                      onRemove: () => _removeFromWishlist(product),
+                    );
+                  },
+                ),
+    );
+  }
+}
+
+class WishlistItem extends StatelessWidget {
+  final Product product;
+  final VoidCallback onRemove;
+
+  const WishlistItem({Key? key, required this.product, required this.onRemove}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 4,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Image.asset( // Load image from URL
+              product.imageUrl,
+              fit: BoxFit.cover,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  product.name,
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  '\$${product.price.toStringAsFixed(2)}',
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                ),
+              ],
+            ),
+          ),
+          ButtonBar(
+            alignment: MainAxisAlignment.end,
+            children: [
+              IconButton(
+                icon: Icon(Icons.delete),
+                onPressed: onRemove,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
