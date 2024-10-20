@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import './payment_screen.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({Key? key}) : super(key: key);
@@ -104,15 +105,24 @@ class _CartScreenState extends State<CartScreen> {
               ),
             ),
             // Checkout Button
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: ElevatedButton(
-                onPressed: () {},
-                                    style: ElevatedButton.styleFrom(primary: Color(0xff5ABD8C)),
-
-                child: Text('Checkout'),
-              ),
-            ),
+           // Checkout Button
+Padding(
+  padding: const EdgeInsets.all(16.0),
+  child: ElevatedButton(
+    onPressed: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PaymentScreen(
+            totalAmount: ((_spaghettiCount * 32.50) + (_pizzaCount * 32.50)) * 1.1,
+          ),
+        ),
+      );
+    },
+    style: ElevatedButton.styleFrom(primary: Color(0xff5ABD8C)),
+    child: Text('Checkout'),
+  ),
+),
           ],
         ),
       ),
