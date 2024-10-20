@@ -6,7 +6,7 @@ class WishlistService {
     // Simulate network delay
     await Future.delayed(Duration(seconds: 1));
     return [
-      Product(id: '1', name: 'The Dissappearance', price: 299.99, imageUrl: 'assets/img/1.jpg'),
+      Product(id: '1', name: 'The Disappearance', price: 299.99, imageUrl: 'assets/img/1.jpg'),
       Product(id: '2', name: 'Fatherhood', price: 899.99, imageUrl: 'assets/img/2.jpg'),
       Product(id: '3', name: 'The Time Travellers', price: 99.99, imageUrl: 'assets/img/3.jpg'),
       // Add more products as needed
@@ -24,7 +24,7 @@ class Product {
 }
 
 class WishlistScreen extends StatefulWidget {
-    const WishlistScreen({Key? key}) : super(key: key);
+  const WishlistScreen({Key? key}) : super(key: key);
 
   @override
   _WishlistScreenState createState() => _WishlistScreenState();
@@ -66,28 +66,30 @@ class _WishlistScreenState extends State<WishlistScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('My Wishlist'),
-       backgroundColor: Color(0xff5ABD8C),
+        backgroundColor: Color(0xff5ABD8C),
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
           : _wishlistItems.isEmpty
               ? Center(child: Text('Your wishlist is empty'))
-              : GridView.builder(
-                  padding: EdgeInsets.all(16),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 0.7,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
+              : Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: GridView.builder(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: 0.6,  // Adjusted aspect ratio
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                    ),
+                    itemCount: _wishlistItems.length,
+                    itemBuilder: (context, index) {
+                      final product = _wishlistItems[index];
+                      return WishlistItem(
+                        product: product,
+                        onRemove: () => _removeFromWishlist(product),
+                      );
+                    },
                   ),
-                  itemCount: _wishlistItems.length,
-                  itemBuilder: (context, index) {
-                    final product = _wishlistItems[index];
-                    return WishlistItem(
-                      product: product,
-                      onRemove: () => _removeFromWishlist(product),
-                    );
-                  },
                 ),
     );
   }
@@ -103,39 +105,61 @@ class WishlistItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            child: Image.asset( // Load image from URL
-              product.imageUrl,
-              fit: BoxFit.cover,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  product.name,
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  '\$${product.price.toStringAsFixed(2)}',
-                  style: TextStyle(fontSize: 16, color: Colors.grey),
-                ),
-              ],
-            ),
-          ),
-          ButtonBar(
-            alignment: MainAxisAlignment.end,
-            children: [
-              IconButton(
-                icon: Icon(Icons.delete),
-                onPressed: onRemove,
+            flex: 3,  // Adjusted flex value to reduce image height
+            child: ClipRRect(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+              child: Image.asset(
+                product.imageUrl,
+                fit: BoxFit.cover,
+                width: double.infinity,
               ),
-            ],
+            ),
+          ),
+          Expanded(
+            flex: 2,  // Adjusted flex value to give more space for text and button
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: SingleChildScrollView(  // Added SingleChildScrollView to prevent overflow
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          product.name,
+                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          '\$${product.price.toStringAsFixed(2)}',
+                          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                        ),
+                      ],
+                    ),
+                    Align(
+                      alignment: Alignment.bottomRight,
+                      child: IconButton(
+                        icon: Icon(Icons.delete, color: Colors.red, size: 20),
+                        onPressed: onRemove,
+                        padding: EdgeInsets.zero,
+                        constraints: BoxConstraints(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ],
       ),
