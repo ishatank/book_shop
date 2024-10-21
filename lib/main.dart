@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
         primaryColor: TColor.primary,  // Assuming TColor is defined in color_extension.dart
         fontFamily: 'SF Pro Text',
       ),
-      home: const MainTabView(),
+      home: const OnboardingView(),
     );
   }
 }

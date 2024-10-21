@@ -1,9 +1,10 @@
-import 'package:book_grocer/view/login/help_us_view.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../../common/color_extenstion.dart';
 import '../../common_widget/round_button.dart';
 import '../../common_widget/round_textfield.dart';
+import '../main_tab/main_tab_view.dart';
 
 class SignUpView extends StatefulWidget {
   const SignUpView({super.key});
@@ -16,9 +17,45 @@ class _SignUpViewState extends State<SignUpView> {
   TextEditingController txtFirstName = TextEditingController();
   TextEditingController txtEmail = TextEditingController();
   TextEditingController txtMobile = TextEditingController();
-  TextEditingController txtCode = TextEditingController();
   TextEditingController txtPassword = TextEditingController();
   bool isStay = false;
+
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  // Method to add user data to Firestore
+  Future<void> _signUp() async {
+    try {
+      // Add user data to Firestore using .add() method
+      await _firestore.collection('book_shop').add({
+        'name': txtFirstName.text,
+        'email': txtEmail.text,
+        'phone': txtMobile.text,
+        'password': txtPassword.text, // Ideally, don't store passwords as plain text
+      });
+
+      // Show success Snackbar
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Sign-up successful!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      // Navigate to profile or any other screen
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const MainTabView()),
+      );
+    } catch (e) {
+      // Show error Snackbar
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,17 +95,14 @@ class _SignUpViewState extends State<SignUpView> {
                 hintText: "First & Last Name",
               ),
               const SizedBox(
-                height: 15,
+                height: 20,
               ),
               RoundTextField(
                   controller: txtEmail,
                   hintText: "Email Address",
                   keyboardType: TextInputType.emailAddress),
               const SizedBox(
-                height: 15,
-              ),
-              const SizedBox(
-                height: 15,
+                height: 20,
               ),
               RoundTextField(
                 controller: txtMobile,
@@ -76,14 +110,7 @@ class _SignUpViewState extends State<SignUpView> {
                 keyboardType: TextInputType.phone,
               ),
               const SizedBox(
-                height: 15,
-              ),
-              RoundTextField(
-                controller: txtCode,
-                hintText: "Group Special Code (optional)",
-              ),
-              const SizedBox(
-                height: 15,
+                height: 20,
               ),
               RoundTextField(
                 controller: txtPassword,
@@ -91,7 +118,7 @@ class _SignUpViewState extends State<SignUpView> {
                 obscureText: true,
               ),
               const SizedBox(
-                height: 15,
+                height: 20,
               ),
               Row(
                 children: [
@@ -120,13 +147,11 @@ class _SignUpViewState extends State<SignUpView> {
                 ],
               ),
               const SizedBox(
-                height: 8,
+                height: 20,
               ),
               RoundLineButton(
                 title: "Sign Up",
-                onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder:  (context) => const HelpUsView()  ));
-                },
+                onPressed: _signUp, // Call the signup method
               )
             ],
           ),
