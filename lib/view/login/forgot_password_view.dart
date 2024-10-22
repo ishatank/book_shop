@@ -1,19 +1,20 @@
-import 'package:book_grocer/common/color_extenstion.dart';
 import 'package:flutter/material.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:book_grocer/common/color_extenstion.dart';
 import '../../common_widget/round_button.dart';
 import '../../common_widget/round_textfield.dart';
+import 'otp_verification_view.dart';
 
 class ForgotPasswordView extends StatefulWidget {
-  const ForgotPasswordView({super.key});
+  const ForgotPasswordView({Key? key}) : super(key: key);
 
   @override
   State<ForgotPasswordView> createState() => _ForgotPasswordViewState();
 }
 
 class _ForgotPasswordViewState extends State<ForgotPasswordView> {
-
-  TextEditingController txtEmail = TextEditingController();
+  TextEditingController txtPhoneNumber = TextEditingController();
+  String? errorMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -45,27 +46,73 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                     fontSize: 24,
                     fontWeight: FontWeight.w700),
               ),
-              const SizedBox(
-                height: 15,
-              ),
-           
+              const SizedBox(height: 15),
               RoundTextField(
-                controller: txtEmail,
-                hintText: "Email Address",
+                controller: txtPhoneNumber,
+                hintText: "Phone Number",
+                keyboardType: TextInputType.phone,
               ),
-              
-              const SizedBox(
-                height: 25,
-              ),
-              
+              const SizedBox(height: 25),
+              if (errorMessage != null)
+                Text(
+                  errorMessage!,
+                  style: TextStyle(color: Colors.red),
+                ),
+              const SizedBox(height: 10),
               RoundLineButton(
                 title: "Submit",
-                onPressed: () {},
-              )
+                onPressed: () async {
+                  await sendOtp(txtPhoneNumber.text.trim());
+                },
+              ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  Future<void> sendOtp(String phoneNumber) async {
+    try {
+      await FirebaseAuth.instance.verifyPhoneNumber(
+        phoneNumber: phoneNumber,
+        verificationCompleted: (PhoneAuthCredential credential) async {
+          await FirebaseAuth.instance.signInWithCredential(credential);
+          // Navigate to the home screen or another appropriate screen
+          Navigator.of(context).pushReplacementNamed('/home'); // Adjust this route as needed
+        },
+        verificationFailed: (FirebaseAuthException e) {
+          setState(() {
+            errorMessage = e.message;
+          });
+        },
+        codeSent: (String verificationId, int? resendToken) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => OtpVerificationView(verificationId: verificationId),
+            ),
+          );
+        },
+        codeAutoRetrievalTimeout: (String verificationId) {
+          // Auto-resolution timed out
+          setState(() {
+            errorMessage = "OTP auto-retrieval timed out. Please try again.";
+          });
+        },
+        timeout: const Duration(seconds: 60),
+      );
+    } catch (e) {
+      setState(() {
+        errorMessage = "An error occurred. Please try again later.";
+      });
+      print("Error sending OTP: $e");
+    }
+  }
+
+  @override
+  void dispose() {
+    txtPhoneNumber.dispose();
+    super.dispose();
   }
 }
